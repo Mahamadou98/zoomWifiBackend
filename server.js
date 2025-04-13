@@ -22,7 +22,8 @@ const app = express()
 //192.168.0.100:3000/api/v1
 http: app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://192.168.0.100:8081',
+    // origin: process.env.CLIENT_URL || 'http://192.168.0.100:8081',
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
