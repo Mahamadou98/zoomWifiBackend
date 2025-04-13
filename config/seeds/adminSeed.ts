@@ -18,8 +18,8 @@ const adminUser = {
   country: 'Mali',
   city: 'Bamako',
   gender: 'Male',
-  password: '12345qwert',
-  passwordConfirm: '12345qwert',
+  password: process.env.ADMIN_PASSWORD || '12345qwert',
+  passwordConfirm: process.env.ADMIN_PASSWORD_CONFIRM || '12345qwert',
   role: 'admin',
 }
 
