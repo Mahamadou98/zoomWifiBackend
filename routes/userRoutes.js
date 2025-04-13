@@ -7,6 +7,7 @@ const {
   resetPassword,
   protect,
   updatePassword,
+  loginAdmin,
 } = require('./../controllers/authController')
 
 const {
@@ -23,7 +24,8 @@ const {
 const router = express.Router()
 
 router.post('/signup', signup)
-router.post('/login', login)
+router.post('/login', login) //loginAdmin
+router.post('/adminLogin', loginAdmin)
 router.get('/logout', logout)
 router.get('/:client_id/profile', getProfile)
 

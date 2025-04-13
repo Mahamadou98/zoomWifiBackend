@@ -84,6 +84,28 @@ exports.login = async (req, res, next) => {
   createSendToken(user, 200, res)
 }
 
+exports.loginAdmin = async (req, res, next) => {
+  const { email, password } = req.body
+
+  // check email and password exist
+  if (!email || !password) {
+    return next(
+      new AppError('Veuillez bien entrer votre numero et le mot de passe', 400),
+    )
+  }
+  // check if user exists and password is correct
+  const user = await User.findOne({ email })
+    .select('+password')
+    .populate('connexions')
+
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError('Numero ou mot de passe incorrect', 401))
+  }
+
+  // if everything ok, send token to client
+  createSendToken(user, 200, res)
+}
+
 exports.logout = (req, res) => {
   res.cookie('jwt', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
