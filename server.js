@@ -23,6 +23,7 @@ const app = express()
 http: app.use(
   cors({
     origin: [
+      'http://192.168.0.100:3000',
       process.env.DASHBOARD_UR, // React dashboard
       process.env.CLIENT_URL || '*', // Keep existing mobile app access
     ],
