@@ -22,10 +22,13 @@ const app = express()
 //192.168.0.100:3000/api/v1
 http: app.use(
   cors({
-    // origin: process.env.CLIENT_URL || 'http://192.168.0.100:8081',
-    origin: '*',
+    origin: [
+      process.env.DASHBOARD_UR, // React dashboard
+      process.env.CLIENT_URL || '*', // Keep existing mobile app access
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true, // Allow cookies if you're using them
   }),
 )
 
