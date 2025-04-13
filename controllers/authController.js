@@ -194,6 +194,7 @@ exports.forgotPassword = async (req, res, next) => {
         status: 'succes',
         message: 'Token sent to email',
       })
+      console.log('Email sent...')
     } catch (err) {
       user.passwordResetToken = undefined
       user.passwordResetExpires = undefined
