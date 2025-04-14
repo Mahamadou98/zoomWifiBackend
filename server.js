@@ -23,6 +23,7 @@ const app = express()
 http: app.use(
   cors({
     origin: [
+      'https://zoomwifidashboard.onrender.com',
       'http://localhost:5173',
       process.env.DASHBOARD_UR, // React dashboard
       process.env.CLIENT_URL || '*', // Keep existing mobile app access
