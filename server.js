@@ -27,7 +27,7 @@ http: app.use(
       process.env.DASHBOARD_UR, // React dashboard
       process.env.CLIENT_URL || '*', // Keep existing mobile app access
     ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // Allow cookies if you're using them
   }),

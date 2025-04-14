@@ -434,3 +434,50 @@ exports.deleteMe = async (req, res, next) => {
     })
   }
 }
+
+exports.updatePartnerStatus = async (req, res) => {
+  try {
+    // Only allow updating the active status
+    if (!req.body.hasOwnProperty('active')) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'This route is only for updating partner status',
+      })
+    }
+
+    // Ensure active is boolean
+    if (typeof req.body.active !== 'boolean') {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Active status must be boolean',
+      })
+    }
+
+    const partner = await Partner.findByIdAndUpdate(
+      req.params.partner_id,
+      { active: req.body.active },
+      {
+        new: true,
+        runValidators: true,
+        select: 'establishmentName email active', // Only return necessary fields
+      },
+    )
+
+    if (!partner) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No partner found with that ID',
+      })
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: { partner },
+    })
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message,
+    })
+  }
+}

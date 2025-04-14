@@ -13,6 +13,7 @@ const {
   updateMe,
   deleteMe,
   getProfile,
+  updatePartnerStatus,
 } = require('./../controllers/partnerController')
 
 const router = express.Router()
@@ -21,6 +22,7 @@ router.post('/signup', signup)
 router.post('/login', login)
 router.get('/logout', logout)
 router.get('/:partner_id/profile', getProfile)
+router.patch('/:partner_id/status', updatePartnerStatus)
 
 router.post('/forgotPassword', forgotPassword)
 router.patch('/resetPassword/:token', resetPassword)
