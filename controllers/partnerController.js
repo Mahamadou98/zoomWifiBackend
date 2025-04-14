@@ -347,20 +347,49 @@ exports.getProfile = async (req, res) => {
   }
 }
 
-// exports.Activate = async (req, res) => {
-//   try {
-//     const partner = await Partner.findById(req.params.id)
-//     res.status(200).json({
-//       status: 'success',
-//       data: { partner },
-//     })
-//   } catch (err) {
-//     res.status(400).json({
-//       status: 'fail',
-//       message: err,
-//     })
-//   }
-// }
+exports.confirmEmail = async (req, res, next) => {
+  try {
+    // Get partner based on ID
+    const partner = await Partner.findOne({ email: req.body.email })
+    if (!partner) {
+      return next(
+        new AppError('Aucun partenaire trouvé avec cet identifiant', 404),
+      )
+    }
+
+    // Create activation message
+    const message = `Cher/Chère ${partner.managerFirstName},\n\n
+    Nous sommes ravis de vous informer que votre compte partenaire pour ${partner.establishmentName} a été activé avec succès.\n
+    Vous pouvez maintenant vous connecter à votre compte et commencer à utiliser nos services.\n\n
+    Cordialement,\n
+    L'équipe ZoomWifi`
+
+    try {
+      await sendEmail({
+        email: partner.email,
+        subject: 'Activation de votre compte ZoomWifi',
+        message,
+      })
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Email de confirmation envoyé avec succès',
+      })
+    } catch (err) {
+      return next(
+        new AppError(
+          "Une erreur est survenue lors de l'envoi de l'email. Veuillez réessayer plus tard",
+          500,
+        ),
+      )
+    }
+  } catch (err) {
+    res.status(401).json({
+      status: 'fail',
+      message: err.message,
+    })
+  }
+}
 
 exports.updatePartner = async (req, res) => {
   try {
