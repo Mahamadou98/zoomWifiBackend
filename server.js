@@ -16,7 +16,6 @@ const hpp = require('hpp')
 const userRouter = require('./routes/userRoutes')
 const partnerRouter = require('./routes/partnerRoutes')
 const accessPointRouter = require('./routes/accessPointRoutes')
-const connexionRouter = require('./routes/connexionRoutes')
 
 const app = express()
 //192.168.0.100:3000/api/v1
@@ -84,7 +83,6 @@ app.use((req, res, next) => {
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/partner', partnerRouter)
 app.use('/api/v1/accessPoint', accessPointRouter)
-app.use('/api/v1/connexion', connexionRouter)
 
 // Start server
 const port = process.env.PORT || 5050

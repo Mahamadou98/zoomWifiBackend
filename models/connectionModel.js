@@ -1,33 +1,35 @@
 const mongoose = require('mongoose')
 
 const ConnexionSchemas = new mongoose.Schema({
-  location: {
+  cliendId: {
     type: String,
-    required: [true, 'la Localisation est requis'],
+    require: [true, "L'identification unique est requis"],
   },
-  type: {
+  establishmentName: {
     type: String,
-    required: [true, "l'adresse est requis"],
   },
-  duration: {
-    type: Number,
-    required: [true, 'la duree de connexion est requis'],
+  connectionDuration: {
+    type: String,
+    required: [true, 'this is required'],
   },
-  amount: {
-    type: Number,
-    required: [true, 'Le montant est requis.'],
+  cost: {
+    type: String,
+    required: [true, 'le cout est requis'],
+  },
+  connectionType: {
+    type: String,
+    required: [true, 'Type de connexion est requis.'],
   },
   createdAt: {
     type: Date,
     default: Date.now(),
   },
-
-  // Reference to Partner
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Must match the Partner model name
-    required: true, // Ensure each access point is linked to a partner
-  },
+  // Reference to Client
+  // user: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'User', // Must match the Partner model name
+  //   required: true, // Ensure each access point is linked to a partner
+  // },
 })
 
 const Connexion = mongoose.model('Connexion', ConnexionSchemas)

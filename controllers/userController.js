@@ -1,5 +1,7 @@
 const User = require('../models/userModel')
 const AppError = require('../utils/appError')
+const Connexion = require('../models/connectionModel')
+const Partner = require('../models/partnerModel')
 
 exports.getAllUsers = (req, res) => {
   res.status(500).json({
@@ -88,11 +90,35 @@ exports.deleteMe = async (req, res, next) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    console.log('user id in backend::', req.params.client_id)
+    //console.log('user id in backend::', req.params.client_id)
     const user = await User.findById(req.params.client_id)
     res.status(200).json({
       status: 'success',
       data: { user },
+    })
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err,
+    })
+  }
+}
+
+exports.saveHistory = async (req, res, next) => {
+  try {
+    const partner = await Partner.findById(req.body.partnerId)
+
+    const connexion = await Connexion.create({
+      cliendId: req.body.clientId,
+      establishmentName: partner.establishmentName,
+      connectionDuration: req.body.connectionDuration,
+      cost: req.body.cost,
+      connectionType: req.body.connectionType,
+    })
+
+    res.status(200).json({
+      status: 'success',
+      data: { connexion },
     })
   } catch (err) {
     res.status(400).json({
