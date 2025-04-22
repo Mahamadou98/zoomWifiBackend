@@ -1,9 +1,9 @@
 const mongoose = require('mongoose')
 
 const ConnexionSchemas = new mongoose.Schema({
-  cliendId: {
+  clientId: {
     type: String,
-    require: [true, "L'identification unique est requis"],
+    required: [true, "L'identification unique est requis"],
   },
   establishmentName: {
     type: String,

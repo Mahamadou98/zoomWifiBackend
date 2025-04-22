@@ -20,12 +20,16 @@ const {
   deleteMe,
   getProfile,
   saveHistory,
+  getUserHistories,
+  getAllHistories,
 } = require('./../controllers/userController')
 
 const router = express.Router()
 
 router.post('/signup', signup)
 router.post('/history', saveHistory)
+router.post('/userHistories', getUserHistories)
+router.get('/getAllHistoris', getAllHistories)
 router.post('/login', login) //loginAdmin
 router.post('/adminLogin', loginAdmin)
 router.get('/logout', logout)

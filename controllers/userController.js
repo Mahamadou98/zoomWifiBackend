@@ -109,12 +109,14 @@ exports.saveHistory = async (req, res, next) => {
     const partner = await Partner.findById(req.body.partnerId)
 
     const connexion = await Connexion.create({
-      cliendId: req.body.clientId,
+      clientId: req.body.cliendId,
       establishmentName: partner.establishmentName,
       connectionDuration: req.body.connectionDuration,
       cost: req.body.cost,
       connectionType: req.body.connectionType,
     })
+
+    console.log('connexion::', connexion)
 
     res.status(200).json({
       status: 'success',
@@ -124,6 +126,41 @@ exports.saveHistory = async (req, res, next) => {
     res.status(400).json({
       status: 'fail',
       message: err,
+    })
+  }
+}
+
+exports.getUserHistories = async (req, res, next) => {
+  try {
+    const { clientId } = req.body
+
+    const histories = await Connexion.find({ clientId })
+
+    res.status(200).json({
+      status: 'success',
+      results: histories.length,
+      data: { histories },
+    })
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message || err,
+    })
+  }
+}
+exports.getAllHistories = async (req, res, next) => {
+  try {
+    const histories = await Connexion.find()
+
+    res.status(200).json({
+      status: 'success',
+      results: histories.length,
+      data: { histories },
+    })
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message || err,
     })
   }
 }
