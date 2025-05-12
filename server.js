@@ -26,6 +26,7 @@ http: app.use(
   cors({
     origin: [
       'https://zoomwifidashboard.onrender.com',
+      'https://zoom-wifi-dashboard.vercel.app',
       'http://localhost:3000',
       'http://localhost:5173',
       process.env.DASHBOARD_UR, // React dashboard
