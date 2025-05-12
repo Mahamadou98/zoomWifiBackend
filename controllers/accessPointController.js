@@ -24,11 +24,11 @@ exports.createAccessPoint = async (req, res) => {
     const partner = await Partner.findById(req.body.partner)
 
     if (!partner) {
-      console.log('error first attemp:')
+      //console.log('error first attemp:')
       throw new Error('Partner not found')
     }
 
-    const accessPoint = await AccessPoint.create(req.body)
+    const accessPoint = await AccessPoint.create(f)
 
     // Update the partner's accessPoints array
     partner.accessPoints.push(accessPoint._id)
@@ -47,25 +47,6 @@ exports.createAccessPoint = async (req, res) => {
   }
 }
 
-// exports.getAllAccessPointsByPartner = async (req, res) => {
-//   console.log("let's got")
-//   try {
-//     // const accessPoints = await AccessPoint.findById(req.params.partnerId)
-//     const accessPoint = await AccessPoint.find({
-//       partner: req.params.partnerId,
-//     })
-
-//     res.status(200).json({
-//       status: 'success',
-//       data: { accessPoint },
-//     })
-//   } catch (err) {
-//     res.status(400).json({
-//       status: 'fail',
-//       message: err,
-//     })
-//   }
-// }
 exports.getAccessPoint = async (req, res) => {
   try {
     const accessPoint = await AccessPoint.findById(req.params.id)

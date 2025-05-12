@@ -3,7 +3,7 @@ const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const crypto = require('crypto')
 
-const userSchemas = new mongoose.Schema({
+const AdminSchemas = new mongoose.Schema({
   firstName: {
     type: String,
     required: [true, "Le nom d'utilisateur est requis"],
@@ -16,47 +16,6 @@ const userSchemas = new mongoose.Schema({
     maxLength: [40, 'Le prenom ne devrais pas depasser 40 caracteres'],
     minLength: [1, 'Le nom ne devrais pas etre au dessus de 1 caracteres'],
   },
-  balance: {
-    type: Number,
-    default: 0,
-  },
-  country: {
-    type: String,
-    required: [true, 'Le nom du pays est requis'],
-    maxLength: [30, 'Le nom du pays ne devrais pas depasser 30 caracteres'],
-    minLength: [
-      2,
-      'Le nom du pays ne devrais pas etre au dessus de 4 caracteres',
-    ],
-  },
-  city: {
-    type: String,
-    required: [true, 'Le nom du ville est requis'],
-    maxLength: [40, 'Le nom ne devrais pas depasser 40 caracteres'],
-    minLength: [
-      4,
-      'Le nom du ville ne devrais pas etre au dessus de 4 caracteres',
-    ],
-  },
-  gender: {
-    type: String,
-    required: [true, 'Le genre est requis'],
-    maxLength: [15, 'Le genre ne devrais pas depasser 150 caracteres'],
-    minLength: [4, 'Le genre ne devrais pas etre au dessus de 4 caracteres'],
-  },
-  phone: {
-    type: String,
-    required: [true, 'votre numero de telephone est requis'],
-    unique: true,
-    maxLength: [
-      15,
-      'le numero de telephone ne devrais pas exede 15 caracteres',
-    ],
-    minLength: [
-      8,
-      'le numero de telephone ne devrais pas etre au dessus de 8 caracteres',
-    ],
-  },
   email: {
     type: String,
     required: [true, "l'address mail est requis"],
@@ -64,18 +23,15 @@ const userSchemas = new mongoose.Schema({
     lowercase: true,
     validate: [validator.isEmail, 'Address mail doit etre une address valide'],
   },
-  photo: String,
   role: {
     type: String,
-    enum: ['user', 'admin'],
-    default: 'user',
-  },
-  lastSeen: {
-    type: Date,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now(),
+    enum: [
+      'super administrateur',
+      'administrateur',
+      'Support',
+      'adminstrateur Transaction',
+    ],
+    default: 'administrateur',
   },
   password: {
     type: String,
@@ -102,22 +58,44 @@ const userSchemas = new mongoose.Schema({
     default: true,
     select: false,
   },
+  lastSeen: {
+    type: Date,
+    // default: Date.now(),
+  },
+  totalRecharge: {
+    type: Number,
+    default: 0,
+    validate: {
+      validator: function (val) {
+        return val >= 0
+      },
+      message: 'le montant doit etre superieur ou egale a 0',
+    },
+  },
+  balance: {
+    type: Number,
+    default: 0,
+    validate: {
+      validator: function (val) {
+        return val >= 0
+      },
+      message: 'le montant doit etre superieur ou egale a 0',
+    },
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
   connexions: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Connexion',
     },
   ],
-  transactions: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Transaction',
-    },
-  ],
 })
 
 // Hashed user password
-userSchemas.pre('save', async function (next) {
+AdminSchemas.pre('save', async function (next) {
   // Only run this function if password was actually modified
   if (!this.isModified('password')) return next()
 
@@ -129,28 +107,28 @@ userSchemas.pre('save', async function (next) {
   next()
 })
 
-userSchemas.pre('save', function (next) {
+AdminSchemas.pre('save', function (next) {
   if (!this.isModified('password') || this.isNew) return next()
 
   this.passwordChangedAt = Date.now() - 1000
   next()
 })
 
-userSchemas.pre(/^find/, function (next) {
+AdminSchemas.pre(/^find/, function (next) {
   // This points to the current query
   // this.find({ active: { $ne: false } })
   next()
 })
 
 // create instance method
-userSchemas.methods.correctPassword = async function (
+AdminSchemas.methods.correctPassword = async function (
   candidatePassword,
   userPassword,
 ) {
   return await bcrypt.compare(candidatePassword, userPassword)
 }
 
-userSchemas.methods.changedPasswordAfter = function (JWTTimestamp) {
+AdminSchemas.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
       this.passwordChangedAt.getTime() / 1000,
@@ -162,7 +140,7 @@ userSchemas.methods.changedPasswordAfter = function (JWTTimestamp) {
   return false
 }
 
-userSchemas.methods.createPasswordResetToken = function () {
+AdminSchemas.methods.createPasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString('hex')
 
   this.passwordResetToken = crypto
@@ -175,6 +153,6 @@ userSchemas.methods.createPasswordResetToken = function () {
   return resetToken
 }
 
-const User = mongoose.model('User', userSchemas)
+const Admin = mongoose.model('Admin', AdminSchemas)
 
-module.exports = User
+module.exports = Admin

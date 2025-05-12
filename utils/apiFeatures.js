@@ -5,16 +5,48 @@ class APIFeatures {
   }
 
   filter() {
-    const queryObj = {...this.queryString}
-    const excludedField = ['page', 'limit', 'sort', 'fields']
+    const queryObj = { ...this.queryString }
+    const excludedField = [
+      'page',
+      'limit',
+      'sort',
+      'fields',
+      'search',
+      'searchFields',
+      'minBalance',
+      'maxBalance',
+    ]
     excludedField.forEach(el => delete queryObj[el])
 
-    // 1B) Advanced filtering
-    // api/v1/tours/?duration[gte]=5
-    let queryStr = JSON.stringify(queryObj)
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`)
+    // Handle balance range filtering
+    if (this.queryString.minBalance || this.queryString.maxBalance) {
+      const minBalance = parseInt(this.queryString.minBalance, 10) || 0
+      const maxBalance = parseInt(this.queryString.maxBalance, 10) || Infinity
 
-    this.query = this.query.find(JSON.parse(queryStr))
+      queryObj.balance = {
+        $gte: minBalance,
+        $lte: maxBalance,
+      }
+    }
+
+    // Handle text search if search parameter exists
+    if (this.queryString.search && this.queryString.searchFields) {
+      const searchFields = this.queryString.searchFields.split(',')
+      const searchValue = this.queryString.search
+
+      const searchQuery = {
+        $or: searchFields.map(field => ({
+          [field]: { $regex: searchValue, $options: 'i' },
+        })),
+      }
+
+      this.query = this.query.find({
+        $and: [searchQuery, queryObj],
+      })
+    } else {
+      this.query = this.query.find(queryObj)
+    }
+
     return this
   }
 

@@ -1,16 +1,18 @@
 const crypto = require('crypto')
 const { promisify } = require('util')
-const User = require('./../models/userModel')
+const Admin = require('./../models/adminModel')
 const jwt = require('jsonwebtoken')
 const AppError = require('./../utils/appError')
 const sendEmail = require('./../utils/email')
 const { throws } = require('assert')
+const APIFeatures = require('../utils/apiFeatures')
 
 const signinToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   })
 }
+
 const createSendToken = (user, statusCode, res) => {
   const token = signinToken(user._id)
 
@@ -39,21 +41,17 @@ const createSendToken = (user, statusCode, res) => {
 
 exports.signup = async (req, res, next) => {
   try {
-    const newUser = await User.create({
+    const newAdmin = await Admin.create({
       firstName: req.body.firstName,
       lastName: req.body.lastName,
-      phone: req.body.phone,
       email: req.body.email,
-      country: req.body.country,
-      city: req.body.city,
-      gender: req.body.gender,
+      role: req.body.role,
       password: req.body.password,
       passwordConfirm: req.body.passwordConfirm,
       passwordChangedAt: req.body.passwordChangedAt,
-      role: req.body.role,
     })
 
-    createSendToken(newUser, 201, res)
+    createSendToken(newAdmin, 201, res)
   } catch (err) {
     res.status(404).json({
       status: 'fail',
@@ -63,25 +61,25 @@ exports.signup = async (req, res, next) => {
 }
 
 exports.login = async (req, res, next) => {
-  const { phone, password } = req.body
+  const { email, password } = req.body
 
   // check email and password exist
-  if (!phone || !password) {
+  if (!email || !password) {
     return next(
       new AppError('Veuillez bien entrer votre numero et le mot de passe', 400),
     )
   }
-  // check if user exists and password is correct
-  const user = await User.findOne({ phone })
+  // check if admin exists and password is correct
+  const admin = await Admin.findOne({ email })
     .select('+password')
     .populate('connexions')
 
-  if (!user || !(await user.correctPassword(password, user.password))) {
+  if (!admin || !(await admin.correctPassword(password, admin.password))) {
     return next(new AppError('Numero ou mot de passe incorrect', 401))
   }
 
   // if everything ok, send token to client
-  createSendToken(user, 200, res)
+  createSendToken(admin, 200, res)
 }
 
 exports.logout = async (req, res) => {
@@ -89,7 +87,8 @@ exports.logout = async (req, res) => {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
   })
-  await User.findByIdAndUpdate(req.body.id, { lastSeen: new Date() })
+
+  await Admin.findByIdAndUpdate(req.body.id, { lastSeen: new Date() })
 
   res.status(200).json({ status: 'success' })
 }
@@ -122,7 +121,7 @@ exports.protect = async (req, res, next) => {
   }
 
   // Check if user still exists
-  const currentUser = await User.findById(decoded.id)
+  const currentUser = await Admin.findById(decoded.id)
   if (!currentUser) {
     return next(
       new AppError("L'utilisateur a qui appartient ce token n'existe plus"),
@@ -160,9 +159,9 @@ exports.restrictTo = (...roles) => {
 
 exports.forgotPassword = async (req, res, next) => {
   try {
-    // Get user based on Posted email
-    const user = await User.findOne({ email: req.body.email })
-    if (!user) {
+    // Get admin based on Posted email
+    const admin = await Admin.findOne({ email: req.body.email })
+    if (!admin) {
       return next(
         new AppError(
           'Cette adresse mail ne correspond a aucun utilisateur',
@@ -172,8 +171,8 @@ exports.forgotPassword = async (req, res, next) => {
     }
 
     // Generate the random reset token
-    const resetToken = user.createPasswordResetToken()
-    await user.save({ validateBeforeSave: false })
+    const resetToken = admin.createPasswordResetToken()
+    await admin.save({ validateBeforeSave: false })
 
     // Send it to user's email
     const resetURL = `${req.protocol}://${req.get(
@@ -225,47 +224,136 @@ exports.resetPassword = async (req, res, next) => {
     .update(req.params.token)
     .digest('hex')
 
-  const user = await User.findOne({
+  const admin = await Admin.findOne({
     passwordResetToken: hashedToken,
     passwordResetExpires: { $gt: Date.now() },
   })
 
   // If token has not expired, and there is user, set the new password
-  if (!user) {
+  if (!admin) {
     return next(new AppError('Token is invalid or has expired', 400))
   }
-  user.password = req.body.password
-  user.passwordConfirm = req.body.passwordConfirm
-  user.passwordResetToken = undefined
-  user.passwordResetExpires = undefined
-  await user.save()
+  admin.password = req.body.password
+  admin.passwordConfirm = req.body.passwordConfirm
+  admin.passwordResetToken = undefined
+  admin.passwordResetExpires = undefined
+  await admin.save()
 
   // Update changedPassword property for the user
   //Log the user in, sent JWT
-  createSendToken(user, 200, res)
+  createSendToken(admin, 200, res)
 }
 
 exports.updatePassword = async (req, res, next) => {
   try {
     // Get user from the collection
-    const user = await User.findById(req.user.id).select('+password')
+    const admin = await Admin.findById(req.user.id).select('+password')
 
     // Check if the current password is correct
     if (
-      !(await user.correctPassword(req.body.passwordCurrent, user.password))
+      !(await admin.correctPassword(req.body.passwordCurrent, admin.password))
     ) {
       return next(new AppError('Votre ancient mot de passe est incorrect', 401))
     }
 
     // If so, update password
-    user.password = req.body.password
-    user.passwordConfirm = req.body.passwordConfirm
-    await user.save()
+    admin.password = req.body.password
+    admin.passwordConfirm = req.body.passwordConfirm
+    await admin.save()
 
     // Log user in, sent JWT token
-    createSendToken(user, 200, res)
+    createSendToken(admin, 200, res)
   } catch (err) {
     res.status(401).json({
+      status: 'fail',
+      message: err.message,
+    })
+  }
+}
+
+exports.getAllAdmins = async (req, res, next) => {
+  try {
+    // const admins = await Admin.find().select('+active')
+
+    const feature = new APIFeatures(Admin.find().select('+active'), req.query)
+      .filter()
+      .paginate()
+
+    const admins = await feature.query
+
+    res.status(200).json({
+      status: 'success',
+      Totals: admins.length,
+      data: { admins },
+    })
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    })
+  }
+}
+exports.deleteAdmin = async (req, res, next) => {
+  try {
+    // await Admin.findOneAndUpdate(req.params.id, { active: false })
+    const admin = await Admin.findOneAndDelete(req.params.id)
+    console.log('Deleting admin...')
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user: admin,
+      },
+    })
+  } catch (err) {
+    res.status(401).json({
+      status: 'fail',
+      message: err,
+    })
+  }
+}
+
+exports.activateAdmin = async (req, res, next) => {
+  console.log('Activating admin...', req.body)
+  try {
+    // Only allow updating the active status
+    if (!req.body.hasOwnProperty('active')) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'This route is only for updating partner status',
+      })
+    }
+
+    // Ensure active is boolean
+    if (typeof req.body.active !== 'boolean') {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Active status must be boolean',
+      })
+    }
+
+    const admin = await Admin.findByIdAndUpdate(
+      req.params.adminId,
+      { active: req.body.active },
+      {
+        new: true,
+        runValidators: true,
+        select: 'firstName, lastName email active', // Only return necessary fields
+      },
+    )
+
+    if (!admin) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No admin found with that ID',
+      })
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: { admin },
+    })
+  } catch (err) {
+    res.status(400).json({
       status: 'fail',
       message: err.message,
     })

@@ -22,6 +22,7 @@ const {
   saveHistory,
   getUserHistories,
   getAllHistories,
+  updateClientStatus,
 } = require('./../controllers/userController')
 
 const router = express.Router()
@@ -30,17 +31,18 @@ router.post('/signup', signup)
 router.post('/history', saveHistory)
 router.post('/userHistories', getUserHistories)
 router.get('/getAllHistoris', getAllHistories)
-router.post('/login', login) //loginAdmin
-router.post('/adminLogin', loginAdmin)
+router.post('/login', login)
 router.get('/logout', logout)
 router.get('/:client_id/profile', getProfile)
+
+router.patch('/updateClientStatus/:clientId', updateClientStatus)
 
 router.post('/forgotPassword', forgotPassword)
 router.patch('/resetPassword/:token', resetPassword)
 router.patch('/updateMyPassword', protect, updatePassword)
 
 router.patch('/updateMe', protect, updateMe)
-router.delete('/deleteMe', protect, deleteMe)
+router.delete('/deleteMe/:id', deleteMe)
 
 router.route('/').get(getAllUsers).post(createUser)
 router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser)

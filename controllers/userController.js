@@ -2,12 +2,28 @@ const User = require('../models/userModel')
 const AppError = require('../utils/appError')
 const Connexion = require('../models/connectionModel')
 const Partner = require('../models/partnerModel')
+const APIFeatures = require('../utils/apiFeatures')
 
-exports.getAllUsers = (req, res) => {
-  res.status(500).json({
-    status: 'internal server error',
-    message: 'This route is not implement',
-  })
+exports.getAllUsers = async (req, res) => {
+  try {
+    const feature = new APIFeatures(User.find().select('+active'), req.query)
+      .filter()
+      .paginate()
+
+    const clients = await feature.query
+    const totals = await User.countDocuments()
+
+    res.status(200).json({
+      status: 'success',
+      totals: totals,
+      data: { clients },
+    })
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    })
+  }
 }
 
 exports.createUser = (req, res) => {
@@ -74,11 +90,14 @@ exports.updateMe = async (req, res, next) => {
 
 exports.deleteMe = async (req, res, next) => {
   try {
-    await User.findOneAndUpdate(req.user.id, { active: false })
+    // await User.findOneAndUpdate(req.user.id, { active: false })
+    const client = await User.findByIdAndDelete(req.params.id)
 
     res.status(204).json({
       status: 'success',
-      data: null,
+      data: {
+        user: { client },
+      },
     })
   } catch (err) {
     res.status(401).json({
@@ -148,6 +167,7 @@ exports.getUserHistories = async (req, res, next) => {
     })
   }
 }
+
 exports.getAllHistories = async (req, res, next) => {
   try {
     const histories = await Connexion.find()
@@ -161,6 +181,53 @@ exports.getAllHistories = async (req, res, next) => {
     res.status(400).json({
       status: 'fail',
       message: err.message || err,
+    })
+  }
+}
+
+exports.updateClientStatus = async (req, res) => {
+  try {
+    // Only allow updating the active status
+    if (!req.body.hasOwnProperty('active')) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'This route is only for updating partner status',
+      })
+    }
+
+    // Ensure active is boolean
+    if (typeof req.body.active !== 'boolean') {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Active status must be boolean',
+      })
+    }
+
+    const client = await User.findByIdAndUpdate(
+      req.params.clientId,
+      { active: req.body.active },
+      {
+        new: true,
+        runValidators: true,
+        select: 'firstName email active', // Only return necessary fields
+      },
+    )
+
+    if (!client) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No client found with that ID',
+      })
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: { client },
+    })
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message,
     })
   }
 }

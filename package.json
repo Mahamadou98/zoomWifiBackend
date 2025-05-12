@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "seed:admin": "node ./config/seeds/adminSeed.ts"
+    "seed:admin": "node ./config/seeds/adminSeed.ts",
+    "seed:company": "node ./config/seeds/companySeed.ts"
   },
   "keywords": [],
   "author": "",

@@ -47,6 +47,10 @@ const partnerSchemas = new mongoose.Schema({
     lowercase: true,
     validate: [validator.isEmail, 'Address mail doit etre une address valide'],
   },
+  balance: {
+    type: Number,
+    default: 0,
+  },
   phone: {
     type: String,
     unique: true,
@@ -90,6 +94,13 @@ const partnerSchemas = new mongoose.Schema({
     maxLength: [20, "L'address ne devrais pas depasser 20 caracteres"],
     minLength: [4, "L'address ne devrais pas etre au dessus de 4 caracteres"],
   },
+  lastSeen: {
+    type: Date,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
   password: {
     type: String,
     required: [true, 'Le mot de passe est requis'],
@@ -119,6 +130,12 @@ const partnerSchemas = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'AccessPoint',
+    },
+  ],
+  transactions: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Transaction',
     },
   ],
 })

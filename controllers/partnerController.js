@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 const AppError = require('./../utils/appError')
 const sendEmail = require('./../utils/email')
 const { throws } = require('assert')
+const APIFeatures = require('../utils/apiFeatures')
 
 const signinToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -87,11 +88,14 @@ exports.login = async (req, res, next) => {
   createSendToken(partner, 200, res)
 }
 
-exports.logout = (req, res) => {
+exports.logout = async (req, res) => {
   res.cookie('jwt', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
   })
+
+  await Partner.findByIdAndUpdate(req.body.id, { lastSeen: new Date() })
+
   res.status(200).json({ status: 'success' })
 }
 
@@ -275,11 +279,16 @@ exports.updatePassword = async (req, res, next) => {
 // crud partner
 exports.getAllPartners = async (req, res) => {
   try {
-    const partnes = await Partner.find()
+    const feature = new APIFeatures(Partner.find(), req.query)
+      .filter()
+      .paginate()
+
+    const partnes = await feature.query
+    const totals = await Partner.countDocuments()
 
     res.status(200).json({
       status: 'success',
-      Totals: partnes.length,
+      totals: totals,
       data: { partnes },
     })
   } catch (err) {

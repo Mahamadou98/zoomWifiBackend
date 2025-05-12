@@ -16,6 +16,9 @@ const hpp = require('hpp')
 const userRouter = require('./routes/userRoutes')
 const partnerRouter = require('./routes/partnerRoutes')
 const accessPointRouter = require('./routes/accessPointRoutes')
+const adminRouter = require('./routes/adminRoutes')
+const transactionRouter = require('./routes/transactionRoutes')
+const companyRouter = require('./routes/companyRoutes')
 
 const app = express()
 //192.168.0.100:3000/api/v1
@@ -23,6 +26,7 @@ http: app.use(
   cors({
     origin: [
       'https://zoomwifidashboard.onrender.com',
+      'http://localhost:3000',
       'http://localhost:5173',
       process.env.DASHBOARD_UR, // React dashboard
       process.env.CLIENT_URL || '*', // Keep existing mobile app access
@@ -83,6 +87,9 @@ app.use((req, res, next) => {
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/partner', partnerRouter)
 app.use('/api/v1/accessPoint', accessPointRouter)
+app.use('/api/v1/admin', adminRouter)
+app.use('/api/v1/transaction', transactionRouter)
+app.use('/api/v1/company', companyRouter)
 
 // Start server
 const port = process.env.PORT || 5050
