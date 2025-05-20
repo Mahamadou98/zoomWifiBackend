@@ -28,8 +28,8 @@ http: app.use(
       'https://zoomwifidashboard.onrender.com',
       'https://zoom-wifi-dashboard.vercel.app',
       'https://zoomwifi.onrender.com',
-      'http://localhost:3000',
-      'http://localhost:3001',
+      // 'http://localhost:3000',
+      // 'http://localhost:3001',
       process.env.DASHBOARD_UR, // React dashboard
       process.env.CLIENT_URL || '*', // Keep existing mobile app access
     ],
