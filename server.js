@@ -21,12 +21,13 @@ const transactionRouter = require('./routes/transactionRoutes')
 const companyRouter = require('./routes/companyRoutes')
 
 const app = express()
-//192.168.0.100:3000/api/v1
+
 http: app.use(
   cors({
     origin: [
       'https://zoomwifidashboard.onrender.com',
       'https://zoom-wifi-dashboard.vercel.app',
+      'https://zoomwifi.onrender.com',
       'http://localhost:3000',
       'http://localhost:3001',
       process.env.DASHBOARD_UR, // React dashboard
