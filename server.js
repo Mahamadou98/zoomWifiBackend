@@ -25,6 +25,7 @@ const app = express()
 http: app.use(
   cors({
     origin: [
+      'https://zoomwifidashboard.onrender.com',
       'https://zoom-wifi-dashboard.vercel.app',
       'http://localhost:3000',
       'http://localhost:3001',
