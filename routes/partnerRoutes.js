@@ -22,8 +22,8 @@ const router = express.Router()
 router.post('/signup', signup)
 router.post('/login', login)
 router.get('/logout', logout)
-router.get('/:partner_id/profile', getProfile)
-router.patch('/:partner_id/status', updatePartnerStatus)
+router.get('/:partner_id/profile', protect, getProfile)
+router.patch('/:partner_id/status', protect, updatePartnerStatus)
 
 router.post('/confirmEmail', confirmEmail)
 router.post('/forgotPassword', forgotPassword)
@@ -34,6 +34,6 @@ router.patch('/updateMe', protect, updateMe)
 router.delete('/deleteMe', protect, deleteMe)
 
 router.route('/').get(getAllPartners)
-router.route('/:id').get(getPartner).patch(updatePartner)
+router.route('/:id').get(protect, getPartner).patch(protect, updatePartner)
 
 module.exports = router
