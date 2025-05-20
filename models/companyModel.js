@@ -27,6 +27,10 @@ const CompanySchemas = new mongoose.Schema({
     type: String,
     required: [true, 'le pays est requis'],
   },
+  balance: {
+    type: Number,
+    default: 0,
+  },
   commissionPercent: {
     type: Number,
   },

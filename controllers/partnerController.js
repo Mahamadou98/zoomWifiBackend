@@ -55,7 +55,7 @@ exports.signup = async (req, res, next) => {
       passwordConfirm: req.body.passwordConfirm,
       passwordChangedAt: req.body.passwordChangedAt,
     })
-
+    console.log('log data:', newPartner)
     createSendToken(newPartner, 201, res)
   } catch (err) {
     res.status(404).json({

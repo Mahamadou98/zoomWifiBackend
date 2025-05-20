@@ -17,6 +17,7 @@ const companyData = {
   email: 'contact@zoomwifi.com',
   address: 'Rue du Commerce, Plateau',
   country: "Côte d'Ivoire",
+  balance: 500000,
   commissionPercent: 40,
   partnerCommissionPercent: 60,
 }

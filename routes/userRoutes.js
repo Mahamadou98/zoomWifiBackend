@@ -23,6 +23,7 @@ const {
   getUserHistories,
   getAllHistories,
   updateClientStatus,
+  getCountries,
 } = require('./../controllers/userController')
 
 const router = express.Router()
@@ -34,6 +35,9 @@ router.get('/getAllHistoris', getAllHistories)
 router.post('/login', login)
 router.get('/logout', logout)
 router.get('/:client_id/profile', getProfile)
+
+// Countries
+router.get('/countries', getCountries)
 
 router.patch('/updateClientStatus/:clientId', updateClientStatus)
 

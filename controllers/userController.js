@@ -3,6 +3,7 @@ const AppError = require('../utils/appError')
 const Connexion = require('../models/connectionModel')
 const Partner = require('../models/partnerModel')
 const APIFeatures = require('../utils/apiFeatures')
+const Country = require('../models/countryModel')
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -228,6 +229,38 @@ exports.updateClientStatus = async (req, res) => {
     res.status(400).json({
       status: 'fail',
       message: err.message,
+    })
+  }
+}
+
+exports.getCountries = async (req, res) => {
+  try {
+    if (!Country) {
+      throw new Error('Country model not properly imported')
+    }
+
+    const rawCountries = await Country.find().select(
+      'name cities tarifFibrePerMinute tarifDataPerMo',
+    )
+
+    // Transform the data to match the desired structure
+    const transformedCountries = rawCountries.map(country => ({
+      _id: country._id,
+      name: country.name,
+      tarifFibrePerMinute: country.tarifFibrePerMinute,
+      tarifDataPerMo: country.tarifDataPerMo,
+      cities: country.cities.map(city => city.name), // Extract only city names into array
+    }))
+
+    res.status(200).json({
+      status: 'success',
+      results: transformedCountries.length,
+      data: { countries: transformedCountries },
+    })
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: err.message || 'Error fetching countries',
     })
   }
 }

@@ -5,12 +5,26 @@ const Admin = require('../models/adminModel')
 
 exports.getDashboardData = async (req, res) => {
   try {
+    const { startDate, endDate } = req.query
+
+    // Create date filter
+    const dateFilter = {}
+    if (startDate && endDate) {
+      dateFilter.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      }
+    }
+
     const [totalUsers, totalPartners, totalTransactions, adminStats] =
       await Promise.all([
-        User.countDocuments(),
-        Partner.countDocuments(),
-        Transaction.countDocuments(),
+        User.countDocuments(dateFilter),
+        Partner.countDocuments(dateFilter),
+        Transaction.countDocuments(dateFilter),
         Admin.aggregate([
+          {
+            $match: dateFilter,
+          },
           {
             $group: {
               _id: null,

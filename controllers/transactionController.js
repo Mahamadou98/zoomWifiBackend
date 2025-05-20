@@ -3,6 +3,7 @@ const User = require('../models/userModel')
 const Partner = require('../models/partnerModel')
 const Admin = require('../models/adminModel')
 const APIFeatures = require('../utils/apiFeatures')
+const Company = require('../models/companyModel')
 
 /**
  * Common transaction validation logic used by both transaction functions
@@ -399,6 +400,57 @@ exports.getTransactionStats = async (req, res) => {
     res.status(200).json({
       status: 'success',
       data: { stats },
+    })
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message,
+    })
+  }
+}
+
+// Admin retrieve transaction
+exports.adminRetrieveTransaction = async (req, res) => {
+  console.log('admin retrieve data:', req.body)
+  try {
+    const { senderId, amount, type, description } = req.body
+
+    // Check if user exists
+    const admin = await Admin.findById(senderId)
+    if (!admin) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'admin not found',
+      })
+    }
+
+    // get the zoom wifi
+    const company = await Company.findOne()
+
+    // Check if the zoom wifi has sufficient balance
+    if (company.balance < amount) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Insufficient balance',
+      })
+    }
+
+    // Create transaction record
+    const transaction = await Transaction.create({
+      admin: senderId,
+      balance: amount,
+      type,
+      status: 'valide',
+      description,
+    })
+
+    // update zoom wifi balance
+    company.balance -= amount
+    await company.save({ validateBeforeSave: false })
+
+    res.status(201).json({
+      status: 'success',
+      data: { transaction },
     })
   } catch (err) {
     res.status(400).json({
