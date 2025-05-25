@@ -26,7 +26,7 @@ http: app.use(
   cors({
     origin: [
       'https://zoomwifidashboard.onrender.com',
-      'https://zoom-wifi-dashboard.vercel.app',
+      'https://zwdashoard.vercel.app',
       'https://zoomwifi.onrender.com',
       // 'http://localhost:3000',
       // 'http://localhost:3001',
