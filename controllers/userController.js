@@ -4,6 +4,7 @@ const Connexion = require('../models/connectionModel')
 const Partner = require('../models/partnerModel')
 const APIFeatures = require('../utils/apiFeatures')
 const Country = require('../models/countryModel')
+const Transaction = require('../models/transactionModel')
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -14,15 +15,42 @@ exports.getAllUsers = async (req, res) => {
     const clients = await feature.query
     const totals = await User.countDocuments()
 
+    // Fetch both connections and transactions for each user
+    const clientsWithHistory = await Promise.all(
+      clients.map(async client => {
+        // Fetch connections
+        const connections = await Connexion.find({ clientId: client._id })
+          .select(
+            'establishmentName connectionDuration cost connectionType createdAt',
+          )
+          .sort('-createdAt')
+
+        // Fetch transactions
+        const transactions = await Transaction.find({ user: client._id })
+          .select('balance type status description createdAt')
+          .sort('-createdAt')
+
+        return {
+          ...client.toObject(),
+          connections,
+          transactions,
+          totalConnections: connections.length,
+          totalTransactions: transactions.length,
+        }
+      }),
+    )
+
     res.status(200).json({
       status: 'success',
-      totals: totals,
-      data: { clients },
+      totals,
+      data: {
+        clients: clientsWithHistory,
+      },
     })
   } catch (err) {
     res.status(404).json({
       status: 'fail',
-      message: err,
+      message: err.message || 'Error fetching users with history',
     })
   }
 }

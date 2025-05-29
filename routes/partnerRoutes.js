@@ -23,7 +23,7 @@ router.post('/signup', signup)
 router.post('/login', login)
 router.get('/logout', logout)
 router.get('/:partner_id/profile', protect, getProfile)
-router.patch('/:partner_id/status', protect, updatePartnerStatus)
+router.patch('/:partner_id/status', updatePartnerStatus)
 
 router.post('/confirmEmail', confirmEmail)
 router.post('/forgotPassword', forgotPassword)

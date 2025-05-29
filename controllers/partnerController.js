@@ -279,6 +279,9 @@ exports.updatePassword = async (req, res, next) => {
 // crud partner
 exports.getAllPartners = async (req, res) => {
   try {
+    // Disable caching for this response
+    res.set('Cache-Control', 'no-store')
+
     const feature = new APIFeatures(Partner.find(), req.query)
       .filter()
       .paginate()
@@ -475,7 +478,6 @@ exports.deleteMe = async (req, res, next) => {
 
 exports.updatePartnerStatus = async (req, res) => {
   try {
-    // Only allow updating the active status
     if (!req.body.hasOwnProperty('active')) {
       return res.status(400).json({
         status: 'fail',

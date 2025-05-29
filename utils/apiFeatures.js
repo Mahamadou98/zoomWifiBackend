@@ -18,6 +18,11 @@ class APIFeatures {
     ]
     excludedField.forEach(el => delete queryObj[el])
 
+    // Handle city search with case-insensitive match
+    if (queryObj.city) {
+      queryObj.city = { $regex: new RegExp(queryObj.city, 'i') }
+    }
+
     // Handle balance range filtering
     if (this.queryString.minBalance || this.queryString.maxBalance) {
       const minBalance = parseInt(this.queryString.minBalance, 10) || 0
