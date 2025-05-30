@@ -52,9 +52,10 @@ exports.signup = async (req, res, next) => {
       passwordChangedAt: req.body.passwordChangedAt,
       role: req.body.role,
     })
-
+    // console.log('we are here!!')
     createSendToken(newUser, 201, res)
   } catch (err) {
+    // console.log(err)
     res.status(404).json({
       status: 'fail',
       message: err,
